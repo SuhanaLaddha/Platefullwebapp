@@ -172,22 +172,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8 px-4">
-        <div className="container mx-auto text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold">P</span>
-            </div>
-            <span className="varsity-font text-xl text-orange-400">PlateFull</span>
-          </div>
-          <p className="text-gray-400 mb-4">From your plate... to someone's day</p>
-          <p className="text-sm text-gray-500">
-            © 2024 PlateFull. All rights reserved. Making the world a better place, one plate at a time.
-          </p>
-        </div>
-      </footer>
-
       {/* Contact Section - At the very bottom */}
       <section id="contact" className="py-16 px-4 bg-white/50">
         <div className="container mx-auto">
@@ -265,6 +249,22 @@ export default function HomePage() {
           </ScrollAnimation>
         </div>
       </section>
+
+      {/* Footer - At the very bottom */}
+      <footer className="bg-gray-800 text-white py-8 px-4">
+        <div className="container mx-auto text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold">P</span>
+            </div>
+            <span className="varsity-font text-xl text-orange-400">PlateFull</span>
+          </div>
+          <p className="text-gray-400 mb-4">From your plate... to someone's day</p>
+          <p className="text-sm text-gray-500">
+            © 2024 PlateFull. All rights reserved. Making the world a better place, one plate at a time.
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }
