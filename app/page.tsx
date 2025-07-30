@@ -200,23 +200,7 @@ export default function HomePage() {
             </div>
           </ScrollAnimation>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            <ScrollAnimation>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-[#B7C4A1]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MapPin className="w-8 h-8 text-[#B7C4A1]" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Visit Us</h3>
-                <p className="text-gray-600">
-                  123 Impact Street
-                  <br />
-                  Sustainability City, SC 12345
-                  <br />
-                  United States
-                </p>
-              </div>
-            </ScrollAnimation>
-
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <ScrollAnimation>
               <div className="text-center">
                 <div className="w-16 h-16 bg-[#B7C4A1]/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -252,22 +236,6 @@ export default function HomePage() {
                   Phone: 7878943493
                   <br />
                   Email: laddhasuhana@gmail.com
-                </p>
-              </div>
-            </ScrollAnimation>
-
-            <ScrollAnimation>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-[#B7C4A1]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-8 h-8 text-[#B7C4A1]" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">General Contact</h3>
-                <p className="text-gray-600">
-                  hello@platefull.org
-                  <br />
-                  support@platefull.org
-                  <br />
-                  partnerships@platefull.org
                 </p>
               </div>
             </ScrollAnimation>
