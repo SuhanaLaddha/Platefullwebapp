@@ -13,7 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { signInWithEmail, signUpWithEmail, signInWithGoogle } from '@/lib/firebase-auth';
 import { createUser } from '@/lib/firebase-firestore';
 import { User } from 'firebase/auth';
-import { Loader2, Mail, Lock, User as UserIcon, Phone, MapPin } from 'lucide-react';
+import { Loader2, Mail, Lock, User as UserIcon } from 'lucide-react';
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -27,8 +27,6 @@ export default function AuthPage() {
     password: '',
     confirmPassword: '',
     fullName: '',
-    phone: '',
-    address: '',
     userType: 'donor' as 'donor' | 'ngo',
   });
 
@@ -90,15 +88,13 @@ export default function AuthPage() {
         }
 
         if (user) {
-          // Create user document in Firestore
-          await createUser({
-            uid: user.uid,
-            email: user.email!,
-            displayName: formData.fullName,
-            userType: formData.userType,
-            phone: formData.phone || undefined,
-            address: formData.address || undefined,
-          });
+                     // Create user document in Firestore
+           await createUser({
+             uid: user.uid,
+             email: user.email!,
+             displayName: formData.fullName,
+             userType: formData.userType,
+           });
 
           setSuccess('Account created successfully!');
           setTimeout(() => {
@@ -253,37 +249,7 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone (Optional)</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      placeholder="Enter your phone number"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address (Optional)</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="address"
-                      name="address"
-                      type="text"
-                      placeholder="Enter your address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
+                
 
                 <div className="space-y-2">
                   <Label>I am a:</Label>

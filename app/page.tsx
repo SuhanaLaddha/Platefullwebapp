@@ -184,7 +184,7 @@ export default function HomePage() {
             </div>
           </ScrollAnimation>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
             <ScrollAnimation>
               <div className="text-center">
                 <div className="w-16 h-16 bg-[#B7C4A1]/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -195,6 +195,8 @@ export default function HomePage() {
                   123 Impact Street
                   <br />
                   Sustainability City, SC 12345
+                  <br />
+                  United States
                 </p>
               </div>
             </ScrollAnimation>
@@ -208,7 +210,9 @@ export default function HomePage() {
                 <p className="text-gray-600">
                   Monday - Friday
                   <br />
-                  9:00 AM - 6:00 PM
+                  9:00 AM - 6:00 PM EST
+                  <br />
+                  Saturday: 10:00 AM - 2:00 PM
                 </p>
               </div>
             </ScrollAnimation>
@@ -218,15 +222,56 @@ export default function HomePage() {
                 <div className="w-16 h-16 bg-[#B7C4A1]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Award className="w-8 h-8 text-[#B7C4A1]" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Contact</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Email & Phone</h3>
                 <p className="text-gray-600">
                   hello@platefull.org
+                  <br />
+                  support@platefull.org
                   <br />
                   +1 (555) 123-4567
                 </p>
               </div>
             </ScrollAnimation>
+
+            <ScrollAnimation>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-[#B7C4A1]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Heart className="w-8 h-8 text-[#B7C4A1]" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Partnership</h3>
+                <p className="text-gray-600">
+                  partnerships@platefull.org
+                  <br />
+                  For NGOs & Restaurants
+                  <br />
+                  Join our mission
+                </p>
+              </div>
+            </ScrollAnimation>
           </div>
+
+          {/* Additional Contact Info */}
+          <ScrollAnimation>
+            <div className="mt-12 text-center">
+              <div className="bg-[#F5EEDC] rounded-lg p-8 max-w-4xl mx-auto">
+                <h3 className="text-2xl font-semibold text-[#4A7C59] mb-4">Ready to Make a Difference?</h3>
+                <p className="text-gray-600 mb-6">
+                  Whether you're a restaurant looking to donate surplus food, an NGO seeking to help those in need, 
+                  or an individual wanting to contribute to our mission, we're here to help you get started.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link href="/auth">
+                    <Button className="bg-[#4A7C59] hover:bg-[#3A6B4A] text-white px-6 py-3 rounded-full">
+                      Join PlateFull Today
+                    </Button>
+                  </Link>
+                  <Button variant="outline" className="border-[#4A7C59] text-[#4A7C59] hover:bg-[#4A7C59] hover:text-white px-6 py-3 rounded-full">
+                    Download Our App
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </ScrollAnimation>
         </div>
       </section>
 
