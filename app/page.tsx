@@ -238,13 +238,20 @@ export default function HomePage() {
                 <div className="w-16 h-16 bg-[#B7C4A1]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Award className="w-8 h-8 text-[#B7C4A1]" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Email & Phone</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Co-Founders</h3>
                 <p className="text-gray-600">
-                  hello@platefull.org
+                  <strong>Kunika Prajapat</strong>
                   <br />
-                  support@platefull.org
+                  Phone: 8003535828
                   <br />
-                  +1 (555) 123-4567
+                  Email: kunikaprajapat1026@gmail.com
+                  <br />
+                  <br />
+                  <strong>Suhana Laddha</strong>
+                  <br />
+                  Phone: 7878943493
+                  <br />
+                  Email: laddhasuhana@gmail.com
                 </p>
               </div>
             </ScrollAnimation>
@@ -254,13 +261,13 @@ export default function HomePage() {
                 <div className="w-16 h-16 bg-[#B7C4A1]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Heart className="w-8 h-8 text-[#B7C4A1]" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Partnership</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">General Contact</h3>
                 <p className="text-gray-600">
+                  hello@platefull.org
+                  <br />
+                  support@platefull.org
+                  <br />
                   partnerships@platefull.org
-                  <br />
-                  For NGOs & Restaurants
-                  <br />
-                  Join our mission
                 </p>
               </div>
             </ScrollAnimation>
