@@ -1,67 +1,47 @@
-"use client"
+'use client';
 
-import { createContext, useContext, useState, type ReactNode } from "react"
-
-interface User {
-  id: string
-  name: string
-  email: string
-  role: "donor" | "ngo"
-}
+import { createContext, useContext, useEffect, useState } from 'react';
+import { User } from 'firebase/auth';
+import { onAuthStateChange } from '@/lib/firebase-auth';
 
 interface AuthContextType {
-  user: User | null
-  login: (email: string, password: string, role: "donor" | "ngo") => Promise<boolean>
-  signup: (userData: any) => Promise<boolean>
-  logout: () => void
+  user: User | null;
+  loading: boolean;
+  isAuthenticated: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+  isAuthenticated: false,
+});
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-
-  const login = async (email: string, password: string, role: "donor" | "ngo") => {
-    // Mock authentication
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    const mockUser: User = {
-      id: "1",
-      name: "John Doe",
-      email,
-      role,
-    }
-
-    setUser(mockUser)
-    return true
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
   }
+  return context;
+};
 
-  const signup = async (userData: any) => {
-    // Mock signup
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    const mockUser: User = {
-      id: "1",
-      name: userData.fullName,
-      email: userData.email,
-      role: userData.role,
-    }
+  useEffect(() => {
+    const unsubscribe = onAuthStateChange((user) => {
+      setUser(user);
+      setLoading(false);
+    });
 
-    setUser(mockUser)
-    return true
-  }
+    return () => unsubscribe();
+  }, []);
 
-  const logout = () => {
-    setUser(null)
-  }
+  const value = {
+    user,
+    loading,
+    isAuthenticated: !!user,
+  };
 
-  return <AuthContext.Provider value={{ user, login, signup, logout }}>{children}</AuthContext.Provider>
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
-  }
-  return context
-}
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};

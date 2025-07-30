@@ -1,237 +1,381 @@
-"use client"
+'use client';
 
-import type React from "react"
-
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useAuth } from "@/components/auth-provider"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { signInWithEmail, signUpWithEmail, signInWithGoogle } from '@/lib/firebase-auth';
+import { createUser } from '@/lib/firebase-firestore';
+import { User } from 'firebase/auth';
+import { Loader2, Mail, Lock, User as UserIcon, Phone, MapPin } from 'lucide-react';
 
 export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-    role: "" as "donor" | "ngo" | "",
-  })
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const router = useRouter();
 
-  const { login, signup } = useAuth()
-  const router = useRouter()
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    fullName: '',
+    phone: '',
+    address: '',
+    userType: 'donor' as 'donor' | 'ngo',
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleUserTypeChange = (value: string) => {
+    setFormData(prev => ({ ...prev, userType: value as 'donor' | 'ngo' }));
+  };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
-
-    if (!isLogin && !formData.fullName.trim()) {
-      newErrors.fullName = "Full name is required"
+    if (!formData.email || !formData.password) {
+      setError('Please fill in all required fields');
+      return false;
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required"
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email format is invalid"
+    if (isSignUp) {
+      if (!formData.fullName) {
+        setError('Please enter your full name');
+        return false;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match');
+        return false;
+      }
+
+      if (formData.password.length < 6) {
+        setError('Password must be at least 6 characters long');
+        return false;
+      }
     }
 
-    if (!isLogin && !formData.username.trim()) {
-      newErrors.username = "Username is required"
-    }
+    return true;
+  };
 
-    if (!formData.password.trim()) {
-      newErrors.password = "Password is required"
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters"
-    }
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
 
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match"
-    }
+    if (!validateForm()) return;
 
-    if (!formData.role) {
-      newErrors.role = "Please select a role"
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateForm()) return
-
-    setIsLoading(true)
+    setLoading(true);
 
     try {
-      let success = false
+      if (isSignUp) {
+        const { user, error } = await signUpWithEmail(
+          formData.email,
+          formData.password,
+          formData.fullName
+        );
 
-      if (isLogin) {
-        success = await login(formData.email, formData.password, formData.role)
+        if (error) {
+          setError(error);
+          return;
+        }
+
+        if (user) {
+          // Create user document in Firestore
+          await createUser({
+            uid: user.uid,
+            email: user.email!,
+            displayName: formData.fullName,
+            userType: formData.userType,
+            phone: formData.phone || undefined,
+            address: formData.address || undefined,
+          });
+
+          setSuccess('Account created successfully!');
+          setTimeout(() => {
+            router.push(formData.userType === 'donor' ? '/donor-dashboard' : '/ngo-dashboard');
+          }, 1500);
+        }
       } else {
-        success = await signup(formData)
-      }
+        const { user, error } = await signInWithEmail(formData.email, formData.password);
 
-      if (success) {
-        if (formData.role === "donor") {
-          router.push("/donor-dashboard")
-        } else {
-          router.push("/ngo-dashboard")
+        if (error) {
+          setError(error);
+          return;
+        }
+
+        if (user) {
+          setSuccess('Signed in successfully!');
+          setTimeout(() => {
+            router.push('/');
+          }, 1500);
         }
       }
-    } catch (error) {
-      console.error("Auth error:", error)
+    } catch (error: any) {
+      setError(error.message);
     } finally {
-      setIsLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }))
+  const handleGoogleAuth = async () => {
+    setError(null);
+    setLoading(true);
+
+    try {
+      const { user, error } = await signInWithGoogle();
+
+      if (error) {
+        setError(error);
+        return;
+      }
+
+      if (user) {
+        setSuccess('Signed in with Google successfully!');
+        setTimeout(() => {
+          router.push('/');
+        }, 1500);
+      }
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFFCF2] to-[#F5EEDC] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Link href="/" className="inline-flex items-center text-[#4A7C59] hover:text-[#F28C8C] mb-6">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Home
-        </Link>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold text-gray-900">
+            {isSignUp ? 'Create Account' : 'Welcome Back'}
+          </CardTitle>
+          <CardDescription>
+            {isSignUp 
+              ? 'Join Platefull to help reduce food waste and feed those in need'
+              : 'Sign in to your Platefull account'
+            }
+          </CardDescription>
+        </CardHeader>
 
-        <Card className="shadow-xl">
-          <CardHeader className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-[#F28C8C] rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-xl">P</span>
-              </div>
-              <span className="varsity-font text-2xl text-[#4A7C59]">PlateFull</span>
-            </div>
-            <CardTitle className="text-2xl">{isLogin ? "Welcome Back" : "Join PlateFull"}</CardTitle>
-            <p className="text-gray-600">
-              {isLogin ? "Sign in to your account" : "Create your account to start making a difference"}
-            </p>
-          </CardHeader>
+        <CardContent>
+          <Tabs value={isSignUp ? 'signup' : 'signin'} onValueChange={(value) => setIsSignUp(value === 'signup')}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {!isLogin && (
-                <div>
+            <TabsContent value="signin">
+              <form onSubmit={handleEmailAuth} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      placeholder="Enter your password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Sign In
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="signup">
+              <form onSubmit={handleEmailAuth} className="space-y-4">
+                <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    value={formData.fullName}
-                    onChange={(e) => handleInputChange("fullName", e.target.value)}
-                    className={errors.fullName ? "border-red-500" : ""}
-                  />
-                  {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
+                  <div className="relative">
+                    <UserIcon className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="fullName"
+                      name="fullName"
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
                 </div>
-              )}
 
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  className={errors.email ? "border-red-500" : ""}
-                />
-                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-              </div>
-
-              {!isLogin && (
-                <div>
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    type="text"
-                    value={formData.username}
-                    onChange={(e) => handleInputChange("username", e.target.value)}
-                    className={errors.username ? "border-red-500" : ""}
-                  />
-                  {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
                 </div>
-              )}
 
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => handleInputChange("password", e.target.value)}
-                  className={errors.password ? "border-red-500" : ""}
-                />
-                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone (Optional)</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      placeholder="Enter your phone number"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
 
-              {!isLogin && (
-                <div>
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address (Optional)</Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="address"
+                      name="address"
+                      type="text"
+                      placeholder="Enter your address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>I am a:</Label>
+                  <div className="flex space-x-2">
+                    <Button
+                      type="button"
+                      variant={formData.userType === 'donor' ? 'default' : 'outline'}
+                      onClick={() => handleUserTypeChange('donor')}
+                      className="flex-1"
+                    >
+                      Food Donor
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={formData.userType === 'ngo' ? 'default' : 'outline'}
+                      onClick={() => handleUserTypeChange('ngo')}
+                      className="flex-1"
+                    >
+                      NGO
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      placeholder="Create a password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                    className={errors.confirmPassword ? "border-red-500" : ""}
-                  />
-                  {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      placeholder="Confirm your password"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
                 </div>
-              )}
 
-              <div>
-                <Label htmlFor="role">Role</Label>
-                <Select
-                  value={formData.role}
-                  onValueChange={(value: "donor" | "ngo") => handleInputChange("role", value)}
-                >
-                  <SelectTrigger className={errors.role ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ngo">User (NGO)</SelectItem>
-                    <SelectItem value="donor">Donor (Restaurant/Home/Caterer)</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.role && <p className="text-red-500 text-sm mt-1">{errors.role}</p>}
-              </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Create Account
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
 
-              <Button
-                type="submit"
-                className="w-full bg-[#F28C8C] hover:bg-[#4A7C59] text-white rounded-full py-3"
-                disabled={isLoading}
-              >
-                {isLoading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
-              </Button>
-            </form>
+          <div className="mt-6">
+            <Separator className="my-4" />
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleGoogleAuth}
+              disabled={loading}
+            >
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Continue with Google
+            </Button>
+          </div>
 
-            <div className="mt-6 text-center">
-              <p className="text-gray-600">
-                {isLogin ? "Don't have an account?" : "Already have an account?"}
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-[#4A7C59] hover:text-[#F28C8C] font-medium ml-1"
-                >
-                  {isLogin ? "Sign up" : "Sign in"}
-                </button>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          {error && (
+            <Alert className="mt-4" variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {success && (
+            <Alert className="mt-4">
+              <AlertDescription>{success}</AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }

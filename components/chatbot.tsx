@@ -110,6 +110,20 @@ export function Chatbot() {
                 </Button>
               </div>
             </div>
+            {/* Contact Info Section */}
+            <div className="p-4 border-t bg-[#F5EEDC] text-[#4A7C59] text-xs rounded-b-lg">
+              <div className="font-semibold mb-1">Contact Info (Co-Founders):</div>
+              <div className="mb-1">
+                <span className="font-medium">Kunika Prajapat</span><br />
+                Phone: <a href="tel:8003535828" className="underline">8003535828</a><br />
+                Email: <a href="mailto:kunikaprajapat1026@gmail.com" className="underline">kunikaprajapat1026@gmail.com</a>
+              </div>
+              <div>
+                <span className="font-medium">Suhana Laddha</span><br />
+                Phone: <a href="tel:7878943493" className="underline">7878943493</a><br />
+                Email: <a href="mailto:laddhasuhana@gmail.com" className="underline">laddhasuhana@gmail.com</a>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}
