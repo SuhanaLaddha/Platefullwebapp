@@ -59,10 +59,7 @@ export function Navbar() {
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-[#F28C8C] rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-xl">P</span>
-          </div>
-          <span className="varsity-font text-2xl text-[#4A7C59]">PlateFull</span>
+          <img src="/Logo.png" alt="PlateFull Logo" className="h-12 w-auto" />
         </Link>
 
         <div className="hidden md:flex items-center space-x-8">
